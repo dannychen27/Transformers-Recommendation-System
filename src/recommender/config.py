@@ -8,6 +8,10 @@ MAX_SEQUENCE_LENGTH = 5
 BATCH_SIZE = 4
 
 
+# for training
+LEARNING_RATE = 1e-3
+
+
 # for scripts/inspect_data.py
 INSPECT_USER_ID = 196
 
