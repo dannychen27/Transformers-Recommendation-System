@@ -18,9 +18,15 @@ runs/
 # OS
 .DS_Store
 
+# Data
+data/
+
 # Testing
 .pytest_cache/
 .coverage
 
 # Ruff
 .ruff_cache/
+
+# metadata
+*.egg-info/
