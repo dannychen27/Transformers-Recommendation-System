@@ -4,7 +4,7 @@ from recommender.config import (
     BATCH_SIZE,
     DATA_PATH,
     MAX_SEQUENCE_LENGTH,
-    TEST_USER_ID,
+    INSPECT_USER_ID,
 )
 from recommender.data.dataset import SequenceDataset
 from recommender.data.preprocessing import (
@@ -13,6 +13,7 @@ from recommender.data.preprocessing import (
     make_training_examples,
     split_sequence,
 )
+from recommender.models.transformer import TransformerRecommender
 
 
 # 1. Load raw interactions
@@ -24,7 +25,7 @@ sequences = build_user_sequences(df)
 
 
 # 3. Select a user and create a temporal train/validation/test split
-sequence = sequences[TEST_USER_ID]
+sequence = sequences[INSPECT_USER_ID]
 train_sequence, validation_target, test_target = split_sequence(sequence)
 
 
@@ -46,12 +47,27 @@ dataloader = DataLoader(
 )
 
 
-# 7. Retrieve one batch
+# 7a. Retrieve one batch
 input_ids, targets = next(iter(dataloader))
 
 
-# 8. Verify that the preprocessing script produces a
+# 7b. Verify that the preprocessing script produces a
 # correctly shaped batch.
 print("\nBatch shapes:")
 print("Input shape:", input_ids.shape)
 print("Target shape:", targets.shape)
+
+
+# 8. Run one batch through the Transformer
+num_items = int(df["movie_id"].max()) + 1
+
+model = TransformerRecommender(
+    num_items=num_items,
+    max_sequence_length=MAX_SEQUENCE_LENGTH,
+)
+
+logits = model(input_ids)
+
+print("\nTransformer output:")
+print("Logits shape:", logits.shape)
+
