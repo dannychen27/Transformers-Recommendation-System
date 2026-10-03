@@ -1,6 +1,10 @@
 import torch
 from torch import nn
 
+from recommender.config import (
+    TRAIN_LOG_INTERVAL,
+)
+
 
 def train_step(
     model: nn.Module,
@@ -28,6 +32,7 @@ def train_epoch(
     dataloader: torch.utils.data.DataLoader,
     optimizer: torch.optim.Optimizer,
     criterion: nn.Module,
+    log_interval: int = TRAIN_LOG_INTERVAL,
 ) -> float:
     """Train the model for one epoch and return the average loss."""
     model.train()
@@ -35,7 +40,7 @@ def train_epoch(
     total_loss = 0.0
     total_examples = 0
 
-    for input_ids, targets in dataloader:
+    for batch_idx, (input_ids, targets) in enumerate(dataloader):
         loss = train_step(
             model=model,
             input_ids=input_ids,
@@ -47,5 +52,11 @@ def train_epoch(
         batch_size = targets.size(0)
         total_loss += loss * batch_size
         total_examples += batch_size
+
+        if batch_idx % log_interval == 0:
+            print(
+                f"Batch {batch_idx + 1}/{len(dataloader)} "
+                f"| Loss: {loss:.4f}"
+            )
 
     return total_loss / total_examples

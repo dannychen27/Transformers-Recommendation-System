@@ -1,3 +1,4 @@
+import time
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
@@ -8,6 +9,7 @@ from recommender.config import (
     MAX_SEQUENCE_LENGTH,
     NUM_EPOCHS,
     TRAIN_BATCH_SIZE,
+    TRAIN_LOG_INTERVAL,
 )
 from recommender.data.dataset import SequenceDataset
 from recommender.data.preprocessing import (
@@ -75,14 +77,23 @@ optimizer = torch.optim.AdamW(
 
 # 7. Train
 for epoch in range(NUM_EPOCHS):
-    print(f"Starting epoch {epoch + 1}/{NUM_EPOCHS}...")
+    print(f"\nStarting epoch {epoch + 1}/{NUM_EPOCHS}...")
+
+    epoch_start = time.perf_counter()
 
     loss = train_epoch(
         model=model,
         dataloader=training_dataloader,
         optimizer=optimizer,
         criterion=criterion,
+        log_interval=TRAIN_LOG_INTERVAL,
     )
 
-    print(f"Epoch {epoch + 1:2d} | Loss: {loss:.4f}")
+    epoch_duration = time.perf_counter() - epoch_start
+
+    print(
+        f"Epoch {epoch + 1:2d} | "
+        f"Loss: {loss:.4f} | "
+        f"Time: {epoch_duration:.2f}s"
+    )
 
