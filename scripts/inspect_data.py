@@ -1,8 +1,10 @@
+import torch
 from torch.utils.data import DataLoader
 
 from recommender.config import (
-    BATCH_SIZE,
+    INSPECT_BATCH_SIZE,
     DATA_PATH,
+    LEARNING_RATE,
     MAX_SEQUENCE_LENGTH,
     INSPECT_USER_ID,
 )
@@ -14,6 +16,7 @@ from recommender.data.preprocessing import (
     split_sequence,
 )
 from recommender.models.transformer import TransformerRecommender
+from recommender.training.train import train_step
 
 
 # 1. Load raw interactions
@@ -42,7 +45,7 @@ training_dataset = SequenceDataset(
 # 6. Batch training examples
 dataloader = DataLoader(
     training_dataset,
-    batch_size=BATCH_SIZE,
+    batch_size=INSPECT_BATCH_SIZE,
     shuffle=True,
 )
 
@@ -70,4 +73,35 @@ logits = model(input_ids)
 
 print("\nTransformer output:")
 print("Logits shape:", logits.shape)
+
+
+# 9. Create the Transformer
+num_items = int(df["movie_id"].max()) + 1
+
+model = TransformerRecommender(
+    num_items=num_items,
+    max_sequence_length=MAX_SEQUENCE_LENGTH,
+)
+
+
+# 10. Configure training
+criterion = torch.nn.CrossEntropyLoss()
+
+optimizer = torch.optim.AdamW(
+    model.parameters(),
+    lr=LEARNING_RATE,
+)
+
+
+# 11. Perform one training step
+loss = train_step(
+    model=model,
+    input_ids=input_ids,
+    targets=targets,
+    optimizer=optimizer,
+    criterion=criterion,
+)
+
+print("\nTraining step:")
+print("Loss:", loss)
 
