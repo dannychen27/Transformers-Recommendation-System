@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# ML
+data/*
+!data/.gitkeep
+checkpoints/
+runs/
+*.pt
+*.pth
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Ruff
+.ruff_cache/
