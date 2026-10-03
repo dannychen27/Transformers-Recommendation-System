@@ -5,18 +5,20 @@ DATA_PATH = Path("data/raw/ml-100k/u.data")
 
 
 MAX_SEQUENCE_LENGTH = 5
-BATCH_SIZE = 4
 
 
-# for training
+# training
 LEARNING_RATE = 1e-3
+TRAIN_BATCH_SIZE = 128
+NUM_EPOCHS = 3
 
 
-# for scripts/inspect_data.py
+# scripts/inspect_data.py
 INSPECT_USER_ID = 196
+INSPECT_BATCH_SIZE = 4
 
 
-# constants for tests
+# tests/
 TEST_MAX_SEQUENCE_LENGTH = 5
 TEST_TRUNCATION_LENGTH = 4
 TEST_BATCH_SIZE = 4

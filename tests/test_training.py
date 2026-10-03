@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 from recommender.models.transformer import TransformerRecommender
-from recommender.training.train import train_step
+from recommender.training.train import train_epoch, train_step
 
 
 TEST_BATCH_SIZE = 4
@@ -58,3 +58,46 @@ def test_train_step_updates_model():
         not torch.equal(before, after)
         for before, after in zip(parameters_before, parameters_after)
     )
+
+
+def test_train_epoch_returns_finite_loss():
+    torch.manual_seed(42)
+
+    model = TransformerRecommender(
+        num_items=TEST_NUM_ITEMS,
+        max_sequence_length=TEST_SEQUENCE_LENGTH,
+    )
+
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=TEST_LEARNING_RATE,
+    )
+
+    criterion = nn.CrossEntropyLoss()
+
+    input_ids = torch.tensor(
+        [
+            [0, 0, 1, 2, 3],
+            [0, 4, 5, 6, 7],
+            [8, 9, 10, 11, 12],
+            [0, 0, 13, 14, 15],
+        ]
+    )
+
+    targets = torch.tensor([4, 8, 13, 16])
+
+    dataloader = torch.utils.data.DataLoader(
+        torch.utils.data.TensorDataset(input_ids, targets),
+        batch_size=2,
+        shuffle=False,
+    )
+
+    loss = train_epoch(
+        model=model,
+        dataloader=dataloader,
+        optimizer=optimizer,
+        criterion=criterion,
+    )
+
+    assert torch.isfinite(torch.tensor(loss))
+

@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from recommender.config import (
-    BATCH_SIZE,
+    INSPECT_BATCH_SIZE,
     DATA_PATH,
     LEARNING_RATE,
     MAX_SEQUENCE_LENGTH,
@@ -45,7 +45,7 @@ training_dataset = SequenceDataset(
 # 6. Batch training examples
 dataloader = DataLoader(
     training_dataset,
-    batch_size=BATCH_SIZE,
+    batch_size=INSPECT_BATCH_SIZE,
     shuffle=True,
 )
 
