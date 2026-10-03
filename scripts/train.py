@@ -5,9 +5,13 @@ from torch.utils.data import DataLoader
 
 from recommender.config import (
     DATA_PATH,
+    DROPOUT,
+    EMBEDDING_DIM,
     LEARNING_RATE,
     MAX_SEQUENCE_LENGTH,
     NUM_EPOCHS,
+    NUM_HEADS,
+    NUM_LAYERS,
     TRAIN_BATCH_SIZE,
     TRAIN_LOG_INTERVAL,
 )
@@ -63,6 +67,10 @@ num_items = int(df["movie_id"].max()) + 1
 model = TransformerRecommender(
     num_items=num_items,
     max_sequence_length=MAX_SEQUENCE_LENGTH,
+    embedding_dim=EMBEDDING_DIM,
+    num_heads=NUM_HEADS,
+    num_layers=NUM_LAYERS,
+    dropout=DROPOUT,
 )
 
 
