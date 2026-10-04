@@ -99,6 +99,9 @@ optimizer = torch.optim.AdamW(
 
 
 # 7. Train
+best_validation_loss = float("inf")
+best_model_state = None
+
 for epoch in range(NUM_EPOCHS):
     print(f"\nStarting epoch {epoch + 1}/{NUM_EPOCHS}...")
 
@@ -118,6 +121,18 @@ for epoch in range(NUM_EPOCHS):
         criterion=criterion,
     )
 
+    if validation_loss < best_validation_loss:
+        best_validation_loss = validation_loss
+        best_model_state = {
+            key: value.detach().clone()
+            for key, value in model.state_dict().items()
+        }
+
+        print(
+            f"New best model! Validation loss: "
+            f"{validation_loss:.4f}"
+        )
+
     epoch_duration = time.perf_counter() - epoch_start
 
     print(
@@ -127,3 +142,4 @@ for epoch in range(NUM_EPOCHS):
         f"Time: {epoch_duration:.2f}s"
     )
 
+model.load_state_dict(best_model_state)
