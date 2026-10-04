@@ -19,6 +19,7 @@ from recommender.data.dataset import SequenceDataset
 from recommender.data.preprocessing import (
     build_user_sequences,
     load_ratings,
+    make_test_examples,
     make_training_examples,
     make_validation_examples,
     split_sequence,
@@ -37,7 +38,7 @@ df = load_ratings(DATA_PATH)
 sequences = build_user_sequences(df)
 
 
-# 3a. Build training examples from all users
+# 3. Build training examples
 training_examples = []
 for sequence in sequences.values():
     train_sequence, _, _ = split_sequence(sequence)
@@ -61,7 +62,7 @@ training_dataloader = DataLoader(
 )
 
 
-# 4a. Create validation examples
+# 4. Build validation examples
 validation_examples = make_validation_examples(sequences)
 
 validation_dataset = SequenceDataset(
@@ -143,3 +144,27 @@ for epoch in range(NUM_EPOCHS):
     )
 
 model.load_state_dict(best_model_state)
+
+
+# 8. Evaluate on test set
+test_examples = make_test_examples(sequences)
+
+test_dataset = SequenceDataset(
+    test_examples,
+    max_sequence_length=MAX_SEQUENCE_LENGTH,
+)
+
+test_dataloader = DataLoader(
+    test_dataset,
+    batch_size=TRAIN_BATCH_SIZE,
+    shuffle=False,
+)
+
+test_loss = evaluate(
+    model=model,
+    dataloader=test_dataloader,
+    criterion=criterion,
+)
+
+print(f"\nTest Loss: {test_loss:.4f}")
+

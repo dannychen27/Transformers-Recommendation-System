@@ -2,6 +2,7 @@ import pandas as pd
 
 from recommender.data.preprocessing import (
     build_user_sequences,
+    make_test_examples,
     make_training_examples,
     make_validation_examples,
     split_sequence,
@@ -57,3 +58,28 @@ def test_make_validation_examples():
         ([10, 20], 30),
         ([50, 60], 70),
     ]
+
+def test_make_test_examples():
+    sequences = {
+        1: [10, 20, 30, 40],
+        2: [50, 60, 70, 80],
+    }
+
+    examples = make_test_examples(sequences)
+
+    assert examples == [
+        ([10, 20, 30], 40),
+        ([50, 60, 70], 80),
+    ]
+
+def test_make_test_examples_includes_validation_interaction():
+    sequences = {
+        1: [10, 20, 30, 40, 50],
+    }
+
+    examples = make_test_examples(sequences)
+
+    assert examples == [
+        ([10, 20, 30, 40], 50),
+    ]
+
