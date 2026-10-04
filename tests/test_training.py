@@ -1,8 +1,10 @@
 import torch
 from torch import nn
+from torch.utils.data import DataLoader, TensorDataset
 
 from recommender.models.transformer import TransformerRecommender
 from recommender.training.train import train_epoch, train_step
+from recommender.training.evaluate import evaluate
 
 
 TEST_BATCH_SIZE = 4
@@ -101,3 +103,38 @@ def test_train_epoch_returns_finite_loss():
 
     assert torch.isfinite(torch.tensor(loss))
 
+
+def test_evaluate_returns_finite_loss():
+    torch.manual_seed(42)
+
+    model = TransformerRecommender(
+        num_items=TEST_NUM_ITEMS,
+        max_sequence_length=TEST_SEQUENCE_LENGTH,
+    )
+
+    criterion = nn.CrossEntropyLoss()
+
+    input_ids = torch.tensor(
+        [
+            [0, 0, 1, 2, 3],
+            [0, 4, 5, 6, 7],
+            [8, 9, 10, 11, 12],
+            [0, 0, 13, 14, 15],
+        ]
+    )
+
+    targets = torch.tensor([4, 8, 13, 16])
+
+    dataloader = DataLoader(
+        TensorDataset(input_ids, targets),
+        batch_size=2,
+        shuffle=False,
+    )
+
+    loss = evaluate(
+        model=model,
+        dataloader=dataloader,
+        criterion=criterion,
+    )
+
+    assert torch.isfinite(torch.tensor(loss))
