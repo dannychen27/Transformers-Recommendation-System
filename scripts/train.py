@@ -20,10 +20,12 @@ from recommender.data.preprocessing import (
     build_user_sequences,
     load_ratings,
     make_training_examples,
+    make_validation_examples,
     split_sequence,
 )
 from recommender.models.transformer import TransformerRecommender
 from recommender.training.train import train_epoch
+from recommender.training.evaluate import evaluate
 
 
 
@@ -35,7 +37,7 @@ df = load_ratings(DATA_PATH)
 sequences = build_user_sequences(df)
 
 
-# 3. Build training examples from all users
+# 3a. Build training examples from all users
 training_examples = []
 for sequence in sequences.values():
     train_sequence, _, _ = split_sequence(sequence)
@@ -47,8 +49,6 @@ for sequence in sequences.values():
         )
     )
 
-
-# 4. Create Dataset and DataLoader
 training_dataset = SequenceDataset(
     training_examples,
     max_sequence_length=MAX_SEQUENCE_LENGTH,
@@ -58,6 +58,21 @@ training_dataloader = DataLoader(
     training_dataset,
     batch_size=TRAIN_BATCH_SIZE,
     shuffle=True,
+)
+
+
+# 4a. Create validation examples
+validation_examples = make_validation_examples(sequences)
+
+validation_dataset = SequenceDataset(
+    validation_examples,
+    max_sequence_length=MAX_SEQUENCE_LENGTH,
+)
+
+validation_dataloader = DataLoader(
+    validation_dataset,
+    batch_size=TRAIN_BATCH_SIZE,
+    shuffle=False,
 )
 
 
@@ -89,7 +104,7 @@ for epoch in range(NUM_EPOCHS):
 
     epoch_start = time.perf_counter()
 
-    loss = train_epoch(
+    training_loss = train_epoch(
         model=model,
         dataloader=training_dataloader,
         optimizer=optimizer,
@@ -97,11 +112,18 @@ for epoch in range(NUM_EPOCHS):
         log_interval=TRAIN_LOG_INTERVAL,
     )
 
+    validation_loss = evaluate(
+        model=model,
+        dataloader=validation_dataloader,
+        criterion=criterion,
+    )
+
     epoch_duration = time.perf_counter() - epoch_start
 
     print(
         f"Epoch {epoch + 1:2d} | "
-        f"Loss: {loss:.4f} | "
+        f"Training Loss: {training_loss:.4f} | "
+        f"Validation Loss: {validation_loss:.4f} | "
         f"Time: {epoch_duration:.2f}s"
     )
 
